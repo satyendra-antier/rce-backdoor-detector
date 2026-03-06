@@ -28,7 +28,7 @@ for (let i = 0; i < args.length; i++) {
     console.log(`
 Security Scanner — RCE/backdoor detection (JS, Python, Ruby, Dart, env)
 
-Usage: security-scanner [options]
+Usage: rce-detector [options]
 
 Options:
   --path <dir>       Directory to scan (default: .)

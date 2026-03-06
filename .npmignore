@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+dist
+*.deb
+*.plan.md
+.cursor
+*.log
+.env
+.env.*

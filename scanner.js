@@ -11,13 +11,14 @@ const { isPathAllowlisted, isFindingAllowlisted, loadConfig } = require('./lib/c
 const DEFAULT_IGNORE_DIRS = new Set([
   'node_modules', '.git', 'dist', 'build', '.next', 'coverage', '.cache',
   'security-scanner', '.venv', 'venv', '__pycache__', '.dart_tool', 'vendor', 'tmp',
+  '.nuxt', '.output',
 ]);
 
 const SCAN_EXTENSIONS = new Set(getAllExtensions());
 
 const BASE64_LIKE = /^[A-Za-z0-9+/]+=*$/;
 
-function walkDir(dir, ignoreDirs = DEFAULT_IGNORE_DIRS) {
+function walkDir(dir, ignoreDirs = DEFAULT_IGNORE_DIRS, rootDir = null) {
   const results = [];
   let list;
   try {
@@ -34,7 +35,14 @@ function walkDir(dir, ignoreDirs = DEFAULT_IGNORE_DIRS) {
       continue;
     }
     if (stat.isDirectory()) {
-      if (!ignoreDirs.has(name)) results.push(...walkDir(fullPath, ignoreDirs));
+      if (ignoreDirs.has(name)) continue;
+      // Skip this repo's own pattern definitions (lib/patterns) so we don't flag our detection rules as threats
+      const isScannerPatterns = rootDir &&
+        path.resolve(fullPath) === path.resolve(rootDir, 'lib', 'patterns') &&
+        fs.existsSync(path.resolve(rootDir, 'cli.js')) &&
+        fs.existsSync(path.resolve(rootDir, 'scanner.js'));
+      if (isScannerPatterns) continue;
+      results.push(...walkDir(fullPath, ignoreDirs, rootDir));
     } else if (SCAN_EXTENSIONS.has(path.extname(name))) {
       results.push(fullPath);
     }
@@ -82,7 +90,13 @@ function scan(rootDir, options = {}) {
   if (isPathAllowlisted(resolved, config)) {
     return { files: 0, findings: [], skipped: true, reason: 'allowlisted path' };
   }
-  const files = walkDir(resolved);
+  let files = walkDir(resolved, DEFAULT_IGNORE_DIRS, resolved);
+  // Exclude this scanner's own pattern definitions (they contain the detection rules and would false-positive)
+  const isScannerRepo = fs.existsSync(path.resolve(resolved, 'cli.js')) && fs.existsSync(path.resolve(resolved, 'scanner.js'));
+  if (isScannerRepo) {
+    const patternsDir = path.resolve(resolved, 'lib', 'patterns');
+    files = files.filter((f) => !path.resolve(f).startsWith(patternsDir + path.sep) && path.resolve(f) !== patternsDir);
+  }
   const results = { files: files.length, findings: [] };
 
   for (const filePath of files) {

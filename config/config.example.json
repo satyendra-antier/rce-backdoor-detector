@@ -20,5 +20,6 @@
     "npx": "/usr/bin/npx",
     "python3": "/usr/bin/python3",
     "rails": "/usr/local/bin/rails"
-  }
+  },
+  "_comment_windows": "On Windows use paths like: scanPaths [\"C:\\Users\\You\\projects\"], realBinaries node/npm/npx paths to .exe or .cmd. Config: %USERPROFILE%\\.config\\security-scanner\\config.json"
 }

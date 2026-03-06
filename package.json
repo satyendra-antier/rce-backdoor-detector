@@ -1,0 +1,25 @@
+{
+  "name": "rce-detector",
+  "version": "1.0.1",
+  "description": "RCE/backdoor security scanner for JS, Python, Ruby, Dart — scan before install or run ",
+  "main": "cli.js",
+  "bin": {
+    "rce-detector": "cli.js",
+    "rce-scan": "cli.js"
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "keywords": [
+    "security",
+    "rce",
+    "backdoor",
+    "scanner",
+    "supply-chain"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/satyendra-antier/rce-backdoor-detector.git"
+  }
+}

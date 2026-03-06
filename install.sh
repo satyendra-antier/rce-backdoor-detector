@@ -43,11 +43,14 @@ if [ "$INSTALL_SYSTEM" = true ]; then
       echo "$REAL_BINARIES" | (cd "$INSTALL_DIR" && node scripts/merge-real-binaries.js) 2>/dev/null || true
     fi
   fi
-  # Command wrappers (system-level block)
+  # Command wrappers: always use real NODE to run run-wrapper.js (which then invokes real npm/node/etc from config)
+  # Resolve node without BIN_DIR in PATH so we do not pick up our own wrapper when re-installing
+  PATH_WITHOUT_BIN=$(printf '%s\n' "$PATH" | tr ':' '\n' | grep -vFx "$BIN_DIR" | tr '\n' ':' | sed 's/:$//')
+  REAL_NODE=$(PATH="$PATH_WITHOUT_BIN" command -v node 2>/dev/null || true)
+  [ -z "$REAL_NODE" ] && echo "Warning: node not found; no wrappers installed."
   for cmd in node npm npx python3 python ruby bundle rails flutter dart; do
-    REAL=$(command -v "$cmd" 2>/dev/null || true)
-    [ -z "$REAL" ] && continue
-    sed "s|REAL_BINARY_PLACEHOLDER|$REAL|g" "$INSTALL_DIR/bin/wrapper.sh" | \
+    PATH="$PATH_WITHOUT_BIN" command -v "$cmd" >/dev/null 2>&1 || continue
+    sed "s|REAL_BINARY_PLACEHOLDER|$REAL_NODE|g" "$INSTALL_DIR/bin/wrapper.sh" | \
       sed "s|SCANNER_DIR_PLACEHOLDER|$INSTALL_DIR|g" | \
       sed "s|COMMAND_NAME_PLACEHOLDER|$cmd|g" > "$BIN_DIR/$cmd"
     chmod +x "$BIN_DIR/$cmd"
@@ -68,22 +71,25 @@ else
   SYSTEMD_USER="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
   mkdir -p "$INSTALL_DIR" "$BIN_DIR" "$CONFIG_DIR" "$SYSTEMD_USER"
   cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
+  # Resolve PATH without our bin so we use real node during install (avoid wrapper recursion)
+  PATH_WITHOUT_BIN=$(printf '%s\n' "$PATH" | tr ':' '\n' | grep -vFx "$BIN_DIR" | tr '\n' ':' | sed 's/:$//')
   # CLI binary
   echo "#!/bin/sh" > "$BIN_DIR/security-scanner"
   echo "exec node '$INSTALL_DIR/cli.js' \"\$@\"" >> "$BIN_DIR/security-scanner"
   chmod +x "$BIN_DIR/security-scanner"
-  if command -v node >/dev/null 2>&1; then
-    REAL_BINARIES=$(cd "$INSTALL_DIR" && node scripts/detect-binaries.js 2>/dev/null || echo "{}")
+  if PATH="$PATH_WITHOUT_BIN" command -v node >/dev/null 2>&1; then
+    REAL_BINARIES=$(cd "$INSTALL_DIR" && PATH="$PATH_WITHOUT_BIN" node scripts/detect-binaries.js 2>/dev/null || echo "{}")
     if [ -n "$REAL_BINARIES" ] && [ "$REAL_BINARIES" != "{}" ]; then
       export SECURITY_SCANNER_CONFIG_FILE="$CONFIG_DIR/config.json"
-      echo "$REAL_BINARIES" | (cd "$INSTALL_DIR" && node scripts/merge-real-binaries.js) 2>/dev/null || true
+      echo "$REAL_BINARIES" | (cd "$INSTALL_DIR" && PATH="$PATH_WITHOUT_BIN" node scripts/merge-real-binaries.js) 2>/dev/null || true
     fi
   fi
-  # Command wrappers (system-level block)
+  # Command wrappers: always use real NODE to run run-wrapper.js (which then invokes real npm/node/etc from config)
+  REAL_NODE=$(PATH="$PATH_WITHOUT_BIN" command -v node 2>/dev/null || true)
+  [ -z "$REAL_NODE" ] && echo "Warning: node not found; no wrappers installed."
   for cmd in node npm npx python3 python ruby bundle rails flutter dart; do
-    REAL=$(command -v "$cmd" 2>/dev/null || true)
-    [ -z "$REAL" ] && continue
-    sed "s|REAL_BINARY_PLACEHOLDER|$REAL|g" "$INSTALL_DIR/bin/wrapper.sh" | \
+    PATH="$PATH_WITHOUT_BIN" command -v "$cmd" >/dev/null 2>&1 || continue
+    sed "s|REAL_BINARY_PLACEHOLDER|$REAL_NODE|g" "$INSTALL_DIR/bin/wrapper.sh" | \
       sed "s|SCANNER_DIR_PLACEHOLDER|$INSTALL_DIR|g" | \
       sed "s|COMMAND_NAME_PLACEHOLDER|$cmd|g" > "$BIN_DIR/$cmd"
     chmod +x "$BIN_DIR/$cmd"

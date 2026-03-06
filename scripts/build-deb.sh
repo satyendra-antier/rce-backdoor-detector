@@ -38,10 +38,10 @@ INSTALL_DIR="/opt/security-scanner"
 BIN_DIR="/usr/local/bin"
 CONFIG_DIR="/etc/security-scanner"
 mkdir -p "$CONFIG_DIR"
-for cmd in node npm npx python3 python ruby bundle rails flutter dart; do
-  REAL=$(command -v "$cmd" 2>/dev/null || true)
-  [ -z "$REAL" ] && continue
-  sed "s|REAL_BINARY_PLACEHOLDER|$REAL|g" "$INSTALL_DIR/bin/wrapper.sh" | \
+REAL_NODE=$(command -v node 2>/dev/null || true)
+[ -n "$REAL_NODE" ] && for cmd in node npm npx python3 python ruby bundle rails flutter dart; do
+  command -v "$cmd" >/dev/null 2>&1 || continue
+  sed "s|REAL_BINARY_PLACEHOLDER|$REAL_NODE|g" "$INSTALL_DIR/bin/wrapper.sh" | \
     sed "s|SCANNER_DIR_PLACEHOLDER|$INSTALL_DIR|g" | \
     sed "s|COMMAND_NAME_PLACEHOLDER|$cmd|g" > "$BIN_DIR/$cmd"
   chmod +x "$BIN_DIR/$cmd"
