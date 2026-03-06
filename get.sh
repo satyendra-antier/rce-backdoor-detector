@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # One-line install for security-scanner (user install to ~/.local).
-# Usage: curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/security-scanner/main/get.sh | bash
-#    or: curl -fsSL https://.../get.sh | bash
-# If run from inside a security-scanner repo, uses local install.sh; otherwise clones and runs install.
+# Usage (fix the URL: no double slash, use your repo and branch):
+#   curl -fsSL https://raw.githubusercontent.com/satyendra-antier/rce-backdoor-detector/main/get.sh | bash
+# If run from inside the repo directory, uses local install.sh; otherwise clones and runs install.
 
 set -e
-REPO_URL="${SECURITY_SCANNER_REPO:-https://github.com/your-org/security-scanner.git}"
+REPO_URL="${SECURITY_SCANNER_REPO:-https://github.com/satyendra-antier/rce-backdoor-detector.git}"
 BRANCH="${SECURITY_SCANNER_BRANCH:-main}"
 
 if [ -f "install.sh" ] && [ -f "cli.js" ]; then
