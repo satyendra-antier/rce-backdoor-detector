@@ -26,7 +26,9 @@ After install (with wrappers), **before any `npm install` or `npm run start` / `
 | **macOS** | `get.sh`, `install.sh`, `npm install -g rce-detector` |
 | **Windows** | `install.ps1` (PowerShell), `npm install -g rce-detector` |
 
-**Global npm:** After `npm install -g rce-detector` (or `npm install -g .` from repo), run `rce-detector --path . --block --yes` from any project. For automatic scan-before-run on every `npm start` / `node app.js`, use the platform installer (install.sh or install.ps1) to set up command wrappers.
+**Important — npm vs automatic scanning:**  
+- **`npm install -g rce-detector`** only installs the **CLI**. You can run `rce-detector --path . --block --yes` manually; **it does not** hook into `npm start` or `node app.js`, so those commands will **not** be scanned automatically.  
+- For **automatic scan-before-run** (every `npm start`, `node app.js`, `npm install`, etc.), you must use the **platform installer**: **`install.sh`** (Linux/macOS) or **`install.ps1`** (Windows). Those install the CLI and set up command wrappers so the scanner runs first.
 
 ---
 
@@ -398,6 +400,7 @@ To also remove config: `sudo rm -rf /etc/security-scanner`
 
 ## Troubleshooting
 
+- **Scanning not running when I use `npm start` / `node app.js`** — If you installed only with **`npm install -g rce-detector`**, the scanner does **not** run automatically. That installs only the CLI. To get **automatic** scan-before-run, use the platform installer: **`./install.sh`** (Linux/macOS) or **`install.ps1`** (Windows) from the repo. Then open a new terminal so the wrappers are in PATH.
 - **"no real binary for ..."** — Re-run the installer (`install.sh` or `install.ps1`) so it can detect and store paths in config, or set `realBinaries` in your config file by hand.
 - **"Unknown command: .../run-wrapper.js"** when running `npm` — Wrappers are out of date. Re-run the installer from the repo: `cd /path/to/rce-detector && ./install.sh` (Linux/macOS) or `powershell -ExecutionPolicy Bypass -File install.ps1` (Windows). Open a new terminal after install.
 - **Windows: wrappers not used** — Ensure `%LOCALAPPDATA%\bin` is in your user PATH and appears before other Node/npm locations. Open a new terminal after install.
