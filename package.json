@@ -1,6 +1,6 @@
 {
   "name": "rce-detector",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "RCE/backdoor security scanner for JS, Python, Ruby, Dart — scan before install or run ",
   "main": "cli.js",
   "scripts": {
