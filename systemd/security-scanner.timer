@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Security Scanner daily
+Documentation=file://%h/.local/share/security-scanner/README.md
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

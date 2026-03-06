@@ -1,0 +1,24 @@
+{
+  "scanPaths": [
+    "/home/user/projects",
+    "/var/www"
+  ],
+  "allowlistedPaths": [
+    "/home/user/known-safe-project"
+  ],
+  "allowlistedFindings": [
+    {
+      "projectPath": "/home/user/myapp",
+      "file": "server/controllers/legacy.js",
+      "line": 42,
+      "ruleId": "EVAL"
+    }
+  ],
+  "realBinaries": {
+    "node": "/usr/bin/node",
+    "npm": "/usr/bin/npm",
+    "npx": "/usr/bin/npx",
+    "python3": "/usr/bin/python3",
+    "rails": "/usr/local/bin/rails"
+  }
+}

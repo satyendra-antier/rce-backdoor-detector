@@ -1,0 +1,14 @@
+[Unit]
+Description=Security Scanner - RCE/backdoor detection
+Documentation=file://INSTALL_DIR_PLACEHOLDER/README.md
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/env node INSTALL_DIR_PLACEHOLDER/run-service.js
+WorkingDirectory=HOME_PLACEHOLDER
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
