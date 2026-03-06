@@ -10,7 +10,7 @@ Works with **any project type** out of the box: React, Next.js, NestJS, Vue, Nux
 
 | Platform | One-line install |
 |----------|-------------------|
-| **Any (npm)** | `npm install -g rce-detector` then `rce-detector --path . --block --yes` or use platform wrappers below |
+| **Any (npm)** | `npm install -g rce-detector` → CLI only (run `rce-detector --path .` manually). For **auto** scan before `npm start` / `node`, use install.sh or install.ps1 below. |
 | **Linux / macOS** | `curl -fsSL https://raw.githubusercontent.com/satyendra-antier/rce-backdoor-detector/main/get.sh | bash` or `./install.sh` from repo |
 | **Windows** | From repo: `powershell -ExecutionPolicy Bypass -File install.ps1` (or `npm install -g rce-detector`) |
 
