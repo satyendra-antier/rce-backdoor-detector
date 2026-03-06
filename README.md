@@ -10,9 +10,9 @@ Works with **any project type** out of the box: React, Next.js, NestJS, Vue, Nux
 
 | Platform | One-line install |
 |----------|-------------------|
-| **Any (npm)** | `npm install -g rce-detector` → CLI only (run `rce-detector --path .` manually). For **auto** scan before `npm start` / `node`, use install.sh or install.ps1 below. |
+| **Any (npm)** | `npm install -g rce-detector` — installs CLI and sets up wrappers. Run the `export PATH=...` command the installer prints (same terminal) so automatic scan works. |
 | **Linux / macOS** | `curl -fsSL https://raw.githubusercontent.com/satyendra-antier/rce-backdoor-detector/main/get.sh | bash` or `./install.sh` from repo |
-| **Windows** | From repo: `powershell -ExecutionPolicy Bypass -File install.ps1` (or `npm install -g rce-detector`) |
+| **Windows** | `npm install -g rce-detector` (same as above), or from repo: `powershell -ExecutionPolicy Bypass -File install.ps1` |
 
 After install (with wrappers), **before any `npm install` or `npm run start` / `dev` / `serve` / `build`**, and before `node app.js`, `python app.py`, etc., the scanner runs on the current directory; if it finds issues, the command is blocked.
 
@@ -26,9 +26,8 @@ After install (with wrappers), **before any `npm install` or `npm run start` / `
 | **macOS** | `get.sh`, `install.sh`, `npm install -g rce-detector` |
 | **Windows** | `install.ps1` (PowerShell), `npm install -g rce-detector` |
 
-**Important — npm vs automatic scanning:**  
-- **`npm install -g rce-detector`** only installs the **CLI**. You can run `rce-detector --path . --block --yes` manually; **it does not** hook into `npm start` or `node app.js`, so those commands will **not** be scanned automatically.  
-- For **automatic scan-before-run** (every `npm start`, `node app.js`, `npm install`, etc.), you must use the **platform installer**: **`install.sh`** (Linux/macOS) or **`install.ps1`** (Windows). Those install the CLI and set up command wrappers so the scanner runs first.
+**`npm install -g rce-detector` does the full setup:** it installs the CLI and runs a postinstall script that creates command wrappers (node, npm, npx, etc.) in `~/.local/bin` (Linux/macOS) or `%LOCALAPPDATA%\\bin` (Windows) and adds that directory to your shell config. The installer prints a one-line command — **run it in the same terminal** to enable automatic scan immediately (no new terminal needed). Alternatively open a new terminal.  
+You can also use **`install.sh`** (Linux/macOS) or **`install.ps1`** (Windows) from the repo for the same result.
 
 ---
 
@@ -400,7 +399,7 @@ To also remove config: `sudo rm -rf /etc/security-scanner`
 
 ## Troubleshooting
 
-- **Scanning not running when I use `npm start` / `node app.js`** — If you installed only with **`npm install -g rce-detector`**, the scanner does **not** run automatically. That installs only the CLI. To get **automatic** scan-before-run, use the platform installer: **`./install.sh`** (Linux/macOS) or **`install.ps1`** (Windows) from the repo. Then open a new terminal so the wrappers are in PATH.
+- **Scanning not running when I use `npm start` / `node app.js`** — After `npm install -g rce-detector`, run the **`export PATH=...`** command the installer printed (in the same terminal), or open a new terminal. Run `which npm` — it should show `~/.local/bin/npm` (Linux/macOS) or `%LOCALAPPDATA%\\bin\\npm.cmd` (Windows). If not, re-run **`npm install -g rce-detector`** or **`./install.sh`** / **`install.ps1`** from the repo.
 - **"no real binary for ..."** — Re-run the installer (`install.sh` or `install.ps1`) so it can detect and store paths in config, or set `realBinaries` in your config file by hand.
 - **"Unknown command: .../run-wrapper.js"** when running `npm` — Wrappers are out of date. Re-run the installer from the repo: `cd /path/to/rce-detector && ./install.sh` (Linux/macOS) or `powershell -ExecutionPolicy Bypass -File install.ps1` (Windows). Open a new terminal after install.
 - **Windows: wrappers not used** — Ensure `%LOCALAPPDATA%\bin` is in your user PATH and appears before other Node/npm locations. Open a new terminal after install.

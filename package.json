@@ -4,7 +4,7 @@
   "description": "RCE/backdoor security scanner for JS, Python, Ruby, Dart — scan before install or run ",
   "main": "cli.js",
   "scripts": {
-    "postinstall": "node scripts/banner.js"
+    "postinstall": "node scripts/setup-wrappers.js"
   },
   "bin": {
     "rce-detector": "cli.js",
