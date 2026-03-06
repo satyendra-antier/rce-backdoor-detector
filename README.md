@@ -326,6 +326,76 @@ For a **private** repo you would host the .deb and a `Packages`/`Release` struct
 
 ---
 
+## Uninstall
+
+How to remove rce-detector depends on how you installed it.
+
+### Installed via npm
+
+```bash
+npm uninstall -g rce-detector
+```
+
+This removes the `rce-detector` and `rce-scan` commands. It does **not** remove any wrappers or config you added with `install.sh` or `install.ps1` (see below if you used those).
+
+### Installed via install.sh (Linux / macOS, user install)
+
+If you ran `./install.sh` (no `--system`), the tool was installed under `~/.local`. To uninstall:
+
+1. **Remove the wrapper scripts** so your real `node`, `npm`, `npx`, etc. are used again:
+   ```bash
+   rm -f ~/.local/bin/security-scanner \
+         ~/.local/bin/node ~/.local/bin/npm ~/.local/bin/npx \
+         ~/.local/bin/python3 ~/.local/bin/python ~/.local/bin/ruby \
+         ~/.local/bin/bundle ~/.local/bin/rails ~/.local/bin/flutter ~/.local/bin/dart
+   ```
+2. **Remove the install directory:**
+   ```bash
+   rm -rf ~/.local/share/security-scanner
+   ```
+3. **Optional:** Remove the PATH line from your shell config. Edit `~/.bashrc` and `~/.zshrc` and delete the lines that mention `security-scanner` and `~/.local/bin` (or `$HOME/.local/bin`).
+4. **Optional:** Remove config and allowlist: `rm -rf ~/.config/security-scanner`
+5. **Optional:** Remove user systemd units: `rm -f ~/.config/systemd/user/security-scanner.service ~/.config/systemd/user/security-scanner.timer`
+
+Open a new terminal so the old wrappers are no longer in PATH.
+
+### Installed via install.sh --system (Linux / macOS, system-wide)
+
+If you ran `sudo ./install.sh --system`:
+
+```bash
+sudo rm -f /usr/local/bin/security-scanner \
+      /usr/local/bin/node /usr/local/bin/npm /usr/local/bin/npx \
+      /usr/local/bin/python3 /usr/local/bin/python /usr/local/bin/ruby \
+      /usr/local/bin/bundle /usr/local/bin/rails /usr/local/bin/flutter /usr/local/bin/dart
+sudo rm -rf /opt/security-scanner
+sudo rm -f /etc/systemd/system/security-scanner.service /etc/systemd/system/security-scanner.timer
+sudo rm -rf /etc/security-scanner
+sudo systemctl daemon-reload
+```
+
+After this, the real `node`, `npm`, etc. from your system (or nvm) will be used again.
+
+### Installed via install.ps1 (Windows)
+
+1. **Remove the wrapper scripts** from your user bin directory:
+   - Delete (or rename) the folder `%LOCALAPPDATA%\bin` if it only contained rce-detector wrappers, or delete these files inside it: `security-scanner.cmd`, `node.cmd`, `npm.cmd`, `npx.cmd`, and any other `.cmd` wrappers that were added.
+2. **Remove the install directory:** Delete the folder `%LOCALAPPDATA%\security-scanner`.
+3. **Remove from PATH:** Open System Properties → Environment Variables → User variables → Path, and remove the entry for `%LOCALAPPDATA%\bin` (or the path you added).
+4. **Optional:** Remove config: `%USERPROFILE%\.config\security-scanner`.
+
+Open a new terminal/PowerShell after changing PATH.
+
+### Installed via .deb (Debian/Ubuntu)
+
+```bash
+sudo apt remove security-scanner
+```
+
+To also remove config: `sudo rm -rf /etc/security-scanner`
+
+---
+
 ## Troubleshooting
 
 - **"no real binary for ..."** — Re-run the installer (`install.sh` or `install.ps1`) so it can detect and store paths in config, or set `realBinaries` in your config file by hand.

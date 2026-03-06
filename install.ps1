@@ -83,3 +83,4 @@ Write-Host ""
 Write-Host "Command wrappers (scan before run): $BinDir\node.cmd, npm.cmd, npx.cmd, ..."
 Write-Host "Open a new terminal so PATH is updated. Then npm start, node app.js, etc. will be scanned first."
 Write-Host ""
+& $nodePath (Join-Path $InstallDir "scripts\banner.js") 2>$null

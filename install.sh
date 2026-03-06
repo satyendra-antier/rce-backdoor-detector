@@ -64,6 +64,7 @@ if [ "$INSTALL_SYSTEM" = true ]; then
   echo "Ensure $BIN_DIR is in PATH (often already is). Then npm start, node server.js, etc. will be scanned first (block only; no codebase destruction)."
   echo "Enable timer: sudo systemctl enable --now security-scanner.timer"
   echo "Run once:     sudo systemctl start security-scanner"
+  [ -n "$REAL_NODE" ] && [ -x "$REAL_NODE" ] && "$REAL_NODE" "$INSTALL_DIR/scripts/banner.js" 2>/dev/null || true
 else
   INSTALL_DIR="${HOME}/.local/share/security-scanner"
   BIN_DIR="${HOME}/.local/bin"
@@ -130,4 +131,5 @@ else
   echo "User systemd: $SYSTEMD_USER"
   echo "  systemctl --user start security-scanner   # run once"
   echo "  systemctl --user enable --now security-scanner.timer   # daily"
+  [ -x "$REAL_NODE" ] && "$REAL_NODE" "$INSTALL_DIR/scripts/banner.js" 2>/dev/null || true
 fi

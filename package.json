@@ -3,6 +3,9 @@
   "version": "1.0.2",
   "description": "RCE/backdoor security scanner for JS, Python, Ruby, Dart — scan before install or run ",
   "main": "cli.js",
+  "scripts": {
+    "postinstall": "node scripts/banner.js"
+  },
   "bin": {
     "rce-detector": "cli.js",
     "rce-scan": "cli.js"
@@ -21,5 +24,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/satyendra-antier/rce-backdoor-detector.git"
-  }
+  },
+  "author": "Satyendra Pandey"
 }
