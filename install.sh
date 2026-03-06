@@ -58,7 +58,7 @@ if [ "$INSTALL_SYSTEM" = true ]; then
   systemctl daemon-reload
   echo "Installed to $INSTALL_DIR, binary: $BIN_DIR/security-scanner"
   echo "Command wrappers (system-level block): $BIN_DIR/{node,npm,npx,python3,...}"
-  echo "Ensure $BIN_DIR is in PATH (often already is). Then npm start, node server.js, etc. will be scanned first."
+  echo "Ensure $BIN_DIR is in PATH (often already is). Then npm start, node server.js, etc. will be scanned first (block only; no codebase destruction)."
   echo "Enable timer: sudo systemctl enable --now security-scanner.timer"
   echo "Run once:     sudo systemctl start security-scanner"
 else
@@ -91,6 +91,23 @@ else
   # systemd user
   sed "s|INSTALL_DIR_PLACEHOLDER|$INSTALL_DIR|g" "$SCRIPT_DIR/systemd/security-scanner.service" | sed "s|HOME_PLACEHOLDER|$HOME|g" > "$SYSTEMD_USER/security-scanner.service"
   cp "$SCRIPT_DIR/systemd/security-scanner.timer" "$SYSTEMD_USER/"
+  # Auto-add PATH to shell profiles so wrappers are used without manual steps
+  add_path_line() {
+    local profile="$1"
+    local line="export PATH=\"$BIN_DIR:\$PATH\""
+    [ ! -f "$profile" ] && return
+    if grep -qF "$BIN_DIR" "$profile" 2>/dev/null; then
+      return
+    fi
+    echo "" >> "$profile"
+    echo "# security-scanner: use command wrappers (node, npm, python, etc.)" >> "$profile"
+    echo "$line" >> "$profile"
+    echo "  Added PATH to $profile"
+  }
+  add_path_line "$HOME/.bashrc"
+  add_path_line "$HOME/.zshrc"
+  [ -f "$HOME/.profile" ] && ! grep -qF "$BIN_DIR" "$HOME/.profile" 2>/dev/null && add_path_line "$HOME/.profile"
+  echo ""
   echo "Installed to $INSTALL_DIR"
   echo "Binary: $BIN_DIR/security-scanner"
   echo "Config: $CONFIG_DIR/config.json"
@@ -98,15 +115,11 @@ else
   echo "=== System-level block (project run interception) ==="
   echo "Command wrappers were installed to: $BIN_DIR"
   echo "  (node, npm, npx, python3, python, ruby, bundle, rails, flutter, dart)"
-  echo ""
-  echo "Put this directory at the START of your PATH so these wrappers run first:"
-  echo "  export PATH=\"$BIN_DIR:\$PATH\""
-  echo "Add the line above to your shell profile (~/.bashrc, ~/.zshrc, or ~/.profile)."
+  echo "  PATH was added to your shell profile. Open a new terminal or run: source ~/.bashrc"
   echo ""
   echo "Then, without running any scan manually:"
   echo "  - npm start, node server.js, etc. → scanner runs on current dir first; blocks if threats found"
   echo "  - python app.py, rails s, flutter run → same"
-  echo "  - Works across any repo/codebase you run from."
   echo ""
   echo "User systemd: $SYSTEMD_USER"
   echo "  systemctl --user start security-scanner   # run once"

@@ -4,6 +4,31 @@ A **cross-platform** (Windows, macOS, Linux) static analysis tool that scans **m
 
 ---
 
+## Install as a Linux tool (system-wide)
+
+To have the scanner **work across the whole system** for every user and every directory (any `npm install`, `node app.js`, `python app.py`, etc. gets scanned first and blocked if threats are found):
+
+**Option 1 — Direct install (recommended):**
+```bash
+cd /path/to/security-scanner
+sudo ./install.sh --system
+```
+- Installs to `/opt/security-scanner` and puts `security-scanner` plus command wrappers (`node`, `npm`, `npx`, `python3`, etc.) in `/usr/local/bin`.
+- Config: `/etc/security-scanner/config.json`.
+- **No codebase is destroyed**; the tool only blocks the command when threats are found.
+
+**Option 2 — Install from a .deb package (like system software):**
+```bash
+cd /path/to/security-scanner
+./scripts/build-deb.sh 1.0.0
+sudo dpkg -i dist/security-scanner_1.0.0_all.deb
+```
+- Same effect as Option 1: system-wide install. Requires Node.js (`apt install nodejs` if needed).
+
+After either option, `/usr/local/bin` is usually already in PATH. Then **any** project run (from any directory, any user) is intercepted: scanner runs first, and the run is blocked if threats are found.
+
+---
+
 ## System-level block (install once, works across all projects)
 
 You can install the scanner **once on your system** and have it **automatically** run before **any** project start, without scanning or configuring each repo.
@@ -12,13 +37,9 @@ You can install the scanner **once on your system** and have it **automatically*
    ```bash
    cd security-scanner && chmod +x install.sh && ./install.sh
    ```
-2. **Put the install bin directory at the start of your PATH** (so the wrappers are used instead of the real commands):
-   ```bash
-   export PATH="$HOME/.local/bin:$PATH"
-   ```
-   Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, or `~/.profile`).
+   The installer **automatically** adds `~/.local/bin` to the start of your PATH in `~/.bashrc` and `~/.zshrc`. Open a new terminal (or run `source ~/.bashrc`) so the wrappers are used.
 
-3. **Done.** From then on:
+2. **Done.** From then on:
    - When you run **`npm start`**, **`node server.js`**, **`python app.py`**, **`rails s`**, **`flutter run`**, etc., the scanner runs on the **current directory** first.
    - If it finds threats, the command is **blocked** and does not run.
    - If the scan passes (or the path/findings are allowlisted), the real command runs as usual.
@@ -168,7 +189,7 @@ chmod +x install.sh
 - Puts **`security-scanner`** and **command wrappers** (`node`, `npm`, `npx`, `python3`, etc.) in **`~/.local/bin`**
 - Installs **user** systemd unit in `~/.config/systemd/user/` (Linux)
 
-**To enable system-level block:** Put `~/.local/bin` at the **start** of your PATH (see “System-level block” above).
+**To enable system-level block:** The installer adds `~/.local/bin` to your shell profile automatically; open a new terminal or run `source ~/.bashrc`.
 
 **Optional – scheduled scan (systemd):**
 
@@ -200,6 +221,49 @@ sudo systemctl enable --now security-scanner.timer
 ```
 
 The **service** runs **`run-service.js`**, which reads **`scanPaths`** from config and runs the scanner on each path with **`--block --yes`**. The **wrappers** run the scanner on the **current working directory** whenever you run a project (npm start, node server.js, etc.).
+
+---
+
+## Install like system software (apt-style)
+
+You can distribute the tool so others can install it with a single command.
+
+### Option A: One-line install (curl + bash)
+
+Host `get.sh` and `install.sh` (e.g. on GitHub). Users run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/YOUR_ORG/security-scanner/main/get.sh | bash
+```
+
+Or from a repo clone: `./get.sh` (uses local `install.sh`). This does a user install to `~/.local` and auto-configures PATH.
+
+### Option B: .deb package (Debian/Ubuntu)
+
+Build a `.deb` and install like any system package:
+
+```bash
+# From the security-scanner repo
+./scripts/build-deb.sh 1.0.0
+# Produces: dist/security-scanner_1.0.0_all.deb
+
+sudo dpkg -i dist/security-scanner_1.0.0_all.deb
+```
+
+This installs to `/opt/security-scanner`, puts `security-scanner` and command wrappers in `/usr/local/bin`, and config in `/etc/security-scanner/`. Requires Node.js (`apt install nodejs`).
+
+### Option C: Add to your own apt repo (PPA or private repo)
+
+1. Build the .deb with `./scripts/build-deb.sh <version>`.
+2. Publish the `.deb` to a PPA (Launchpad), or to a private apt repository.
+3. Users then run:
+   ```bash
+   sudo add-apt-repository ppa:your-org/security-scanner   # if using PPA
+   sudo apt update
+   sudo apt install security-scanner
+   ```
+
+For a **private** repo you would host the .deb and a `Packages`/`Release` structure and add the source to `/etc/apt/sources.list.d/`.
 
 ---
 
@@ -245,7 +309,10 @@ security-scanner/
   run-wrapper.js      # Intercepts run/start; runs guard then real binary
   run-service.js      # systemd entry: scan config.scanPaths with --block --yes
   safe-start.js       # Scan then start app if clean
-  install.sh          # User or system install + wrappers + systemd
+  install.sh          # User or system install + wrappers + systemd (auto PATH)
+  get.sh              # One-line install (curl | bash)
+  scripts/
+    build-deb.sh      # Build .deb for apt-style install
   bin/
     wrapper.sh        # Template for command wrappers (node, npm, python3, ...)
   scripts/

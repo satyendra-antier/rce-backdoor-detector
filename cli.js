@@ -3,6 +3,7 @@
  * CLI for RCE/backdoor security scanner.
  * Multi-language (JS, Python, Ruby, Dart). Confirmation prompt, allowlist (override).
  * Usage: node cli.js [--path <dir>] [--block] [--yes] [--json] [--allowlist-path]
+ * No automatic destruction; only blocks (exit 1) when threats found.
  */
 
 const path = require('path');

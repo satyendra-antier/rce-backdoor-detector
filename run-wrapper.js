@@ -51,7 +51,8 @@ function isRunCommand(cmd, args) {
 }
 
 function runGuard(cwd) {
-  const result = spawnSync(process.execPath, [path.join(SCANNER_DIR, 'cli.js'), '--path', cwd, '--block', '--yes'], {
+  const args = [path.join(SCANNER_DIR, 'cli.js'), '--path', cwd, '--block', '--yes'];
+  const result = spawnSync(process.execPath, args, {
     stdio: 'inherit',
     cwd: cwd || process.cwd(),
   });
